@@ -1,8 +1,8 @@
 .vscode
 __pycache__
 
-asset/
-data/
-data_raw/mfc
+/asset/
+/data/
+/data_raw/mfc
 
-data_ingest/outputs
+/data_ingest/outputs
