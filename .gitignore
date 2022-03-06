@@ -1,0 +1,8 @@
+.vscode
+__pycache__
+
+asset/
+data/
+data_raw/mfc
+
+experiments/workflows/outputs/
