@@ -1,6 +1,7 @@
 import json
 import os
 import pickle
+import random
 import shutil
 from multiprocessing import Pool, cpu_count
 from os import mkdir
@@ -8,6 +9,7 @@ from pathlib import Path
 from typing import List
 
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from genericpath import exists
 from tqdm import tqdm
@@ -63,6 +65,12 @@ def save_plt(path: str, dpi: int = DEFAULT_FIGURE_DPI):
 
 def get_full_path(rel_path: str) -> str:
     return os.path.join(Path(__file__).parent.parent, rel_path)
+
+
+def set_random_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
 
 
 class ParallelHandler:

@@ -13,9 +13,15 @@ class DataSample(BaseModel):
     class_idx: Optional[int]
 
 
+class DataSplit(BaseModel):
+    train_ids: List[str] = []
+    test_ids: List[str] = []
+
+
 class ClassDistribution(BaseModel):
-    train_domain2prop: Dict[str, List[float]] = {}
-    test_domain2prop: Dict[str, List[float]] = {}
+    # dict maps a domain name to a list summing to 1
+    train_class_dist: Dict[str, List[float]] = {}
+    test_class_dist: Dict[str, List[float]] = {}
 
 
 class DataCollection(BaseModel):
@@ -23,26 +29,26 @@ class DataCollection(BaseModel):
     domain_strs: List[str] = []
     class_dist: ClassDistribution = ClassDistribution()
     samples: Dict[str, DataSample] = {}
-    train_ids: List[str] = []
-    test_ids: List[str] = []
+    split: DataSplit = DataSplit()
 
     def add_sample(self, sample: DataSample) -> None:
         assert sample.id not in self.samples
         self.samples[sample.id] = sample
 
-    def populate_train_test_split_ids(
+    def populate_random_split(
         self,
-        random_seed: Optional[int] = None,
         train_prop: float = 0.8,
     ) -> None:
+        """
+        set seed before calling this to ensure reproducibility
+        """
         all_ids = sorted(list(self.samples.keys()))
-        rng = random.Random(seed=random_seed)
-        rng.shuffle(all_ids)
+        random.shuffle(all_ids)
 
         n_train_samples = int(len(all_ids) * train_prop)
 
-        self.train_ids = all_ids[:n_train_samples]
-        self.test_ids = all_ids[n_train_samples:]
+        self.split.train_ids = all_ids[:n_train_samples]
+        self.split.test_ids = all_ids[n_train_samples:]
 
     def populate_class_distribution(self) -> None:
         def calculate_class_distribution(
@@ -60,9 +66,9 @@ class DataCollection(BaseModel):
             }
             return domain2prop
 
-        self.class_dist.train_domain2prop = calculate_class_distribution(
-            [self.samples[id] for id in self.train_ids]
+        self.class_dist.train_class_dist = calculate_class_distribution(
+            [self.samples[id] for id in self.split.train_ids]
         )
-        self.class_dist.test_domain2prop = calculate_class_distribution(
-            [self.samples[id] for id in self.test_ids]
+        self.class_dist.test_class_dist = calculate_class_distribution(
+            [self.samples[id] for id in self.split.test_ids]
         )

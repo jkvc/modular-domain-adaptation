@@ -8,7 +8,7 @@ from . import INGESTOR_REGISTRY, Ingestor
 logger = logging.getLogger(__name__)
 
 RAW_DIR = "data_raw/mfc"
-ISSUES = [
+ISSUES = [  # domains
     "climate",
     "deathpenalty",
     "guncontrol",
@@ -16,7 +16,7 @@ ISSUES = [
     "samesex",
     "tobacco",
 ]
-PRIMARY_FRAME_NAMES = [
+PRIMARY_FRAME_NAMES = [  # class names
     "Economic",
     "Capacity and Resources",
     "Morality",
@@ -85,8 +85,8 @@ class MediaFrameCorpusIngestor(Ingestor):
 
         collection.class_strs = PRIMARY_FRAME_NAMES
         collection.domain_strs = ISSUES
-        collection.train_ids = list(all_train_ids)
-        collection.test_ids = list(all_test_ids)
+        collection.split.train_ids = list(all_train_ids)
+        collection.split.test_ids = list(all_test_ids)
         collection.populate_class_distribution()
 
         return collection

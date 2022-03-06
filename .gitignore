@@ -3,6 +3,7 @@ __pycache__
 
 /asset/
 /data/
+/data_raw/arxiv
 /data_raw/mfc
 
 /data_ingest/outputs
