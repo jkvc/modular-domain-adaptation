@@ -1,6 +1,7 @@
 import logging
 
 import hydra
+from mda.util import get_full_path, save_json
 from omegaconf import OmegaConf
 
 from data_ingest.ingestor import INGESTOR_REGISTRY
@@ -16,7 +17,9 @@ def main(config: OmegaConf):
     ingestor = INGESTOR_REGISTRY.from_config(config.ingestor.name, {})
     logger.info(f"ingestor {ingestor}")
 
-    ingestor.run()
+    collection = ingestor.run()
+
+    save_json(collection.dict(), get_full_path(f"data/{config.ingestor.name}.json"))
 
 
 if __name__ == "__main__":

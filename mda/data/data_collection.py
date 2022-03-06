@@ -9,7 +9,6 @@ class DataSample(BaseModel):
     id: str
     text: str
     domain_str: str
-    domain_idx: int
     class_str: Optional[str]
     class_idx: Optional[int]
 
@@ -55,10 +54,11 @@ class DataCollection(BaseModel):
             }
             for s in samples:
                 domain2count[s.domain_str][s.class_idx] += 1
-            return {
+            domain2prop = {
                 domain: (count / count.sum()).tolist()
                 for domain, count in domain2count.items()
             }
+            return domain2prop
 
         self.class_dist.train_domain2prop = calculate_class_distribution(
             [self.samples[id] for id in self.train_ids]
@@ -66,7 +66,3 @@ class DataCollection(BaseModel):
         self.class_dist.test_domain2prop = calculate_class_distribution(
             [self.samples[id] for id in self.test_ids]
         )
-
-
-d = DataCollection()
-print(d.class_dist)

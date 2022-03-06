@@ -1,10 +1,11 @@
 from pathlib import Path
 
+from mda.data.data_collection import DataCollection
 from mda.registry import FromConfigBase, Registry, import_all
 
 
 class Ingestor(FromConfigBase):
-    def run():
+    def run(self) -> DataCollection:
         raise NotImplementedError()
 
 
