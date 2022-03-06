@@ -4,6 +4,8 @@ __pycache__
 /asset/
 /data/
 /data_raw/arxiv
+/data_raw/amazon
 /data_raw/mfc
+/data_raw/senti
 
 /data_ingest/outputs

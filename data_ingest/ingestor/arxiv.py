@@ -2,7 +2,7 @@ import json
 import logging
 
 from mda.data.data_collection import DataCollection, DataSample
-from mda.util import get_full_path, load_json, read_txt_as_str_list
+from mda.util import get_full_path, read_txt_as_str_list
 from tqdm import tqdm
 
 from . import INGESTOR_REGISTRY, Ingestor
