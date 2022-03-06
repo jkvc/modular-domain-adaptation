@@ -1,9 +1,0 @@
-[2022-03-05 18:09:52,802][__main__][INFO] - seed: 3735928559
-dataset:
-  ingestor:
-    name: mfc
-    args:
-      raw_dir: data_raw/mfc
-      save_path: data/mfc.json
-
-[2022-03-05 18:09:52,802][__main__][INFO] - ingestor <MediaFrameCorpusIngestor> {'raw_dir': 'data_raw/mfc'}

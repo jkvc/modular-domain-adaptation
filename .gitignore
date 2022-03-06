@@ -5,4 +5,4 @@ asset/
 data/
 data_raw/mfc
 
-experiments/workflows/outputs/
+data_ingest/outputs
