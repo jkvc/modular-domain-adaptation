@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pandas as pd
 import torch
@@ -15,7 +15,7 @@ class LogisticRegressionModel(Model):
         self,
         vocab_size: int,
         n_classes: int,
-        n_domains: int,
+        n_domains: Optional[int],
         use_domain_specific_bias: bool = False,
         use_learned_residualization: bool = False,
         use_gradient_reversal: bool = False,
@@ -23,6 +23,10 @@ class LogisticRegressionModel(Model):
         regularization_constant: float = 1e-4,
     ):
         super().__init__()
+
+        if use_domain_specific_bias or use_gradient_reversal:
+            assert n_domains is not None
+        n_domains = 1
 
         self.vocab_size: int = vocab_size
         self.n_classes: int = n_classes
