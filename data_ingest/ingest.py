@@ -20,25 +20,26 @@ def main(config: OmegaConf):
     ingestor = INGESTOR_REGISTRY.from_config(config.ingestor.name, {})
     logger.info(f"ingestor {ingestor}")
 
-    collection: DataCollection = ingestor.run()
-    dst_path = get_full_path(f"data/{config.ingestor.name}.json")
-    save_json(collection.dict(), dst_path)
+    train_collection, test_collection = ingestor.run()
+    for split_name, collection in zip(
+        ["train", "test"], [train_collection, test_collection]
+    ):
+        dst_path = get_full_path(f"data/{config.ingestor.name}.{split_name}.json")
+        save_json(collection.dict(), dst_path)
 
-    logger.info(f"total num sample {len(collection.samples)}")
-    logger.info(f"total num train sample {len(collection.split.train_ids)}")
-    logger.info(f"total num  test sample {len(collection.split.test_ids)}")
+        logger.info(f"{split_name}: total num sample {len(collection.samples)}")
 
-    for domain_str in collection.domain_strs:
-        nsamples = sum(
-            [
-                1
-                for sample in collection.samples.values()
-                if sample.domain_str == domain_str
-            ]
-        )
-        logger.info(f"num sample in domain [{domain_str}] {nsamples}")
+        for domain_str in collection.domain_strs:
+            nsamples = sum(
+                [
+                    1
+                    for sample in collection.samples.values()
+                    if sample.domain_str == domain_str
+                ]
+            )
+            logger.info(f"{split_name}: num sample in domain [{domain_str}] {nsamples}")
 
-    logger.info(f"written to path: {dst_path}")
+        logger.info(f"{split_name}: written to path: {dst_path}")
 
 
 if __name__ == "__main__":

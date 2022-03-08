@@ -1,7 +1,7 @@
 import json
 import logging
 
-from mda.data.data_collection import DataCollection, DataSample
+from mda.data.data_collection import DataCollection, DataSample, create_random_split
 from mda.util import get_full_path, read_txt_as_str_list
 from tqdm import tqdm
 
@@ -69,12 +69,25 @@ class ArxivIngestor(Ingestor):
             )
             collection.add_sample(sample)
 
-        collection.class_strs = CLASS_STRS
-        collection.domain_strs = ARXIV_CATEGORIES
-        collection.populate_random_split()
-        collection.populate_class_distribution()
+        all_train_ids, all_test_ids = create_random_split(
+            list(collection.samples.keys())
+        )
 
-        return collection
+        train_collection = DataCollection()
+        for id in all_train_ids:
+            train_collection.add_sample(collection.samples[id])
+        train_collection.class_strs = CLASS_STRS
+        train_collection.domain_strs = ARXIV_CATEGORIES
+        train_collection.populate_class_distribution()
+
+        test_collection = DataCollection()
+        for id in all_test_ids:
+            test_collection.add_sample(collection.samples[id])
+        test_collection.class_strs = CLASS_STRS
+        test_collection.domain_strs = ARXIV_CATEGORIES
+        test_collection.populate_class_distribution()
+
+        return train_collection, test_collection
 
 
 # example json line

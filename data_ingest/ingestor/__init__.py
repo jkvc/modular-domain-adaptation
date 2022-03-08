@@ -1,11 +1,12 @@
 from pathlib import Path
+from typing import Tuple
 
 from mda.data.data_collection import DataCollection
 from mda.registry import FromConfigBase, Registry, import_all
 
 
 class Ingestor(FromConfigBase):
-    def run(self) -> DataCollection:
+    def run(self) -> Tuple[DataCollection, DataCollection]:
         raise NotImplementedError()
 
 

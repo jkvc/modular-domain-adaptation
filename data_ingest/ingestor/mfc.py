@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 
 from mda.data.data_collection import DataCollection, DataSample
 from mda.util import get_full_path, load_json
@@ -44,7 +45,7 @@ def _primary_frame_code_to_class_idx(frame_float: float) -> int:
 
 @INGESTOR_REGISTRY.register("mfc")
 class MediaFrameCorpusIngestor(Ingestor):
-    def run(self) -> DataCollection:
+    def run(self) -> Tuple[DataCollection, DataCollection]:
         collection = DataCollection()
         all_train_ids = set()
         all_test_ids = set()
@@ -83,10 +84,18 @@ class MediaFrameCorpusIngestor(Ingestor):
                 )
                 collection.add_sample(sample)
 
-        collection.class_strs = PRIMARY_FRAME_NAMES
-        collection.domain_strs = ISSUES
-        collection.split.train_ids = list(all_train_ids)
-        collection.split.test_ids = list(all_test_ids)
-        collection.populate_class_distribution()
+        train_collection = DataCollection()
+        for id in all_train_ids:
+            train_collection.add_sample(collection.samples[id])
+        train_collection.class_strs = PRIMARY_FRAME_NAMES
+        train_collection.domain_strs = ISSUES
+        train_collection.populate_class_distribution()
 
-        return collection
+        test_collection = DataCollection()
+        for id in all_test_ids:
+            test_collection.add_sample(collection.samples[id])
+        test_collection.class_strs = PRIMARY_FRAME_NAMES
+        test_collection.domain_strs = ISSUES
+        test_collection.populate_class_distribution()
+
+        return train_collection, test_collection
