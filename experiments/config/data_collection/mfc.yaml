@@ -1,1 +1,2 @@
-path: data/mfc.json
+train_path: data/mfc.train.json
+test_path: data/mfc.test.json

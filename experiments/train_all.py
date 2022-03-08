@@ -16,25 +16,24 @@ def main(config: OmegaConf):
     config = OmegaConf.create(OmegaConf.to_container(config, resolve=True))
     logger.info(f"\n{OmegaConf.to_yaml(config, resolve=True)}")
 
-    # load data collection
-    data_collection_json_path = get_full_path(config.data_collection.path)
-    logger.info(f"loading data collection from {data_collection_json_path}")
-    data_collection_dict = load_json(data_collection_json_path)
-    data_collection = DataCollection.parse_obj(data_collection_dict)
-    logger.info(f"loaded data collection of {len(data_collection.samples)} sample")
-    n_classes = len(data_collection.class_strs)
-    logger.info(f"loaded data collection of {n_classes} classes")
-    n_domains = len(data_collection.domain_strs)
-    logger.info(f"loaded data collection of {n_domains} domains")
+    # load train collection
+    train_collection_json_path = get_full_path(config.data_collection.train_path)
+    logger.info(f"loading train collection from {train_collection_json_path}")
+    train_collection_dict = load_json(train_collection_json_path)
+    train_collection = DataCollection.parse_obj(train_collection_dict)
+    logger.info(f"loaded train collection of {len(train_collection.samples)} sample")
+    n_classes = len(train_collection.class_strs)
+    logger.info(f"loaded train collection of {n_classes} classes")
+    n_domains = len(train_collection.domain_strs)
+    logger.info(f"loaded train collection of {n_domains} domains")
 
     # create dataset
-    dataset: MultiDomainDataset = DATASET_REGISTRY.from_config(
+    train_dataset: MultiDomainDataset = DATASET_REGISTRY.from_config(
         config.dataset.name,
         config.dataset.args,
-        collection=data_collection,
-        class_distribution_use_split="train",
+        collection=train_collection,
     )
-    logger.info(f"built dataset of {len(dataset.filtered_samples)} samples")
+    logger.info(f"built train dataset of {len(train_dataset.filtered_samples)} samples")
 
     # build model
     model: Model = MODEL_REGISTRY.from_config(
@@ -48,10 +47,25 @@ def main(config: OmegaConf):
     # train
     train_logreg_model(
         model,
-        dataset,
+        train_dataset,
         num_epoch=20,  # fixme
     )
-    print(eval_logreg_model(model, dataset))
+
+    # test collection
+    test_collection_json_path = get_full_path(config.data_collection.test_path)
+    logger.info(f"loading test collection from {test_collection_json_path}")
+    test_collection_dict = load_json(test_collection_json_path)
+    test_collection = DataCollection.parse_obj(test_collection_dict)
+    logger.info(f"loaded test collection of {len(test_collection.samples)} sample")
+    test_dataset: MultiDomainDataset = DATASET_REGISTRY.from_config(
+        config.dataset.name,
+        config.dataset.args,
+        collection=test_collection,
+        vocab_override=train_dataset.vocab,
+    )
+    logger.info(f"built test dataset of {len(test_dataset.filtered_samples)} samples")
+
+    print(eval_logreg_model(model, test_dataset))
 
 
 if __name__ == "__main__":

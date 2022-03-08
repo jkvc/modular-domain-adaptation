@@ -21,34 +21,26 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
         self,
         collection: DataCollection,
         use_domain_strs: Optional[List[str]] = None,
-        # specify exaclty one of following two
         vocab_size: Optional[int] = None,
         vocab_override: Optional[List[str]] = None,
-        # specify exactly one of following two
-        class_distribution_use_split: Optional[Literal["train", "test"]] = None,
         class_distribution_override: Optional[Dict[str, List[float]]] = None,
     ) -> None:
         super().__init__(collection, use_domain_strs)
         self.all_sample_tokens = self.get_all_sample_tokens()
 
-        assert (vocab_override is not None) != (vocab_size is not None)
         if vocab_override:
+            logger.info("using vocab override")
             self.vocab: List[str] = vocab_override
         else:
+            logger.info(f"building vocab of size {vocab_size}")
             self.vocab = self.build_vocab(vocab_size)
 
-        assert (class_distribution_use_split is not None) != (
-            class_distribution_override is not None
-        )
         if class_distribution_override:
-            self.class_distribution = class_distribution_override
+            self.class_distribution: Dict[
+                str, List[float]
+            ] = class_distribution_override
         else:
-            if class_distribution_use_split == "train":
-                self.class_distribution = collection.class_dist.train_class_dist
-            elif class_distribution_use_split == "test":
-                self.class_distribution = collection.class_dist.test_class_dist
-            else:
-                raise ValueError()
+            self.class_distribution: Dict[str, List[float]] = self.collection.class_dist
 
         self.batch = self.build_batch()
 
