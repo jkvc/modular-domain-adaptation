@@ -16,9 +16,10 @@ class LogisticRegressionModel(Model):
         vocab_size: int,
         n_classes: int,
         n_domains: Optional[int],
-        use_domain_specific_bias: bool = False,
-        use_learned_residualization: bool = False,
+        use_direct_residualization: bool = False,
         use_gradient_reversal: bool = False,
+        use_domain_specific_bias: bool = False,
+        use_domain_specific_normalization: bool = False,
         hidden_size: int = 64,
         regularization_constant: float = 1e-4,
     ):
@@ -31,9 +32,10 @@ class LogisticRegressionModel(Model):
         self.vocab_size: int = vocab_size
         self.n_classes: int = n_classes
         self.n_domains: int = n_domains
-        self.use_domain_specific_bias: bool = use_domain_specific_bias
-        self.use_learned_residualization: bool = use_learned_residualization
+        self.use_direct_residualization: bool = use_direct_residualization
         self.use_gradient_reversal: bool = use_gradient_reversal
+        self.use_domain_specific_bias: bool = use_domain_specific_bias
+        self.use_domain_specific_normalization: bool = use_domain_specific_normalization
         self.hidden_size: int = hidden_size
         self.regularization_constant: float = regularization_constant
 
@@ -54,6 +56,15 @@ class LogisticRegressionModel(Model):
         batchsize, vocabsize = bow.shape
         assert vocabsize == self.vocab_size
 
+        # normalize word frequency at each domain
+        # this works best if `batch` is the entire dataset
+        if self.use_domain_specific_normalization:
+            for domain_idx in range(self.n_domains):
+                sample_idxs = torch.where(batch["domain_idx"] == domain_idx)
+                if len(sample_idxs) == 0:
+                    continue
+                bow[sample_idxs] -= bow[sample_idxs].mean(axis=0)
+
         e = self.tff(bow)
         logits = self.yout(e)
 
@@ -61,7 +72,7 @@ class LogisticRegressionModel(Model):
             class_distribution = batch["class_distribution"].to(torch.float)
             logits = logits + torch.log(class_distribution)
 
-        if self.use_learned_residualization:
+        if self.use_direct_residualization:
             if self.training:
                 domain_onehot = torch.eye(self.n_sources)[batch["domain_idx"]].to(
                     torch.float

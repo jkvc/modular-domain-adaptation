@@ -8,4 +8,5 @@ __pycache__
 /data_raw/mfc
 /data_raw/senti
 
-/data_ingest/outputs
+/*/outputs
+/*/multirun

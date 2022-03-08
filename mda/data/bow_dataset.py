@@ -7,6 +7,7 @@ import nltk
 import numpy as np
 import torch
 from mda.data.data_collection import DataCollection
+from mda.util import AUTO_DEVICE
 from nltk.corpus import stopwords
 
 from . import DATASET_REGISTRY, MultiDomainDataset
@@ -19,18 +20,16 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
     def __init__(
         self,
         collection: DataCollection,
-        use_domain_strs: List[str],
+        use_domain_strs: Optional[List[str]] = None,
         # specify exaclty one of following two
-        vocab_size: Optional[int],
-        vocab_override: Optional[List[str]],
+        vocab_size: Optional[int] = None,
+        vocab_override: Optional[List[str]] = None,
         # specify exactly one of following two
-        class_distribution_use_split: Optional[Literal["train", "test"]],
-        class_distribution_override: Optional[Dict[str, List[float]]],
-        use_domain_specific_normalization: bool = False,
+        class_distribution_use_split: Optional[Literal["train", "test"]] = None,
+        class_distribution_override: Optional[Dict[str, List[float]]] = None,
     ) -> None:
         super().__init__(collection, use_domain_strs)
         self.all_sample_tokens = self.get_all_sample_tokens()
-        self.use_domain_specific_normalization = use_domain_specific_normalization
 
         assert (vocab_override is not None) != (vocab_size is not None)
         if vocab_override:
@@ -61,7 +60,7 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
             sws = set(stopwords.words("english"))
 
         all_sample_tokens: List[List[str]] = []
-        for sample in self.filtered_samples.values():
+        for sample in self.filtered_samples:
             text = sample.text
             nopunc = re.sub(r"[^\w\s]", "", text)
             tokens = nopunc.split()
@@ -94,24 +93,11 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
             class_idx[i] = sample.class_idx
 
         domain_str2domain_idx = {
-            domain_str: idx for idx, domain_str in enumerate(self.use_domain_strs)
+            domain_str: idx for idx, domain_str in enumerate(self.domain_strs)
         }
         domain_idx = torch.LongTensor(
             [domain_str2domain_idx[s.domain_str] for s in self.filtered_samples]
         )
-
-        # normalize word freq within each domain
-        if self.use_domain_specific_normalization:
-            domain_strs = set(sample.domain_str for sample in self.filtered_samples)
-            for domain_str in domain_strs:
-                idxs = [
-                    i
-                    for i, sample in enumerate(self.filtered_samples)
-                    if sample.domain_str == domain_str
-                ]
-                if len(idxs) == 0:
-                    continue
-                bow[idxs] -= bow[idxs].mean(axis=0)
 
         class_distribution = torch.FloatTensor(
             [self.class_distribution[s.domain_str] for s in self.filtered_samples]
@@ -123,7 +109,24 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
             "class_idx": torch.LongTensor(class_idx),
             "domain_idx": domain_idx.to(torch.long),
         }
+        batch = {k: v.to(AUTO_DEVICE) for k, v in batch.items()}
         return batch
 
-    def get_loader(self) -> Iterable[Dict[str, torch.Tensor]]:
-        yield self.batch
+    def get_loader(self, num_worker: int) -> Iterable[Dict[str, torch.Tensor]]:
+        return _single_batch_iterator(self.batch)
+
+
+class _single_batch_iterator:
+    def __init__(self, batch):
+        self.batch = batch
+
+    def __iter__(self):
+        self.returned = False
+        return self
+
+    def __next__(self):
+        if not self.returned:
+            self.returned = True
+            return self.batch
+        else:
+            raise StopIteration

@@ -10,26 +10,27 @@ class MultiDomainDataset(FromConfigBase):
     def __init__(
         self,
         collection: DataCollection,
-        use_domain_strs: Optional[List[str]],
+        use_domain_strs: Optional[List[str]] = None,
     ) -> None:
         super().__init__()
         self.collection: DataCollection = collection
-        assert all(
-            domain_str in collection.domain_strs for domain_str in use_domain_strs
-        )
         if use_domain_strs is None:
             self.filtered_samples: List[DataSample] = list(
                 self.collection.samples.values()
             )
+            self.domain_strs = collection.domain_strs
         else:
+            assert all(
+                domain_str in collection.domain_strs for domain_str in use_domain_strs
+            )
             self.filtered_samples: List[DataSample] = [
                 sample
                 for sample in collection.samples.values()
                 if sample.domain_str in use_domain_strs
             ]
-        self.use_domain_strs = use_domain_strs
+            self.domain_strs = use_domain_strs
 
-    def get_loader(self) -> Iterable[Dict[str, torch.Tensor]]:
+    def get_loader(self, num_worker: int) -> Iterable[Dict[str, torch.Tensor]]:
         raise NotImplementedError()
 
 

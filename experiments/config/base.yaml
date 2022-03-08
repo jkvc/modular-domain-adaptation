@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - data_collection: ???
+  - dataset: ???
+  - model: ???
+
+vocab_size: 5000

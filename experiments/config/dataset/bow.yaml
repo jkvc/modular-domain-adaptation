@@ -1,0 +1,3 @@
+name: bow_single_batch
+args:
+  vocab_size: ${vocab_size}

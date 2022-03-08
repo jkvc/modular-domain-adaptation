@@ -1,0 +1,8 @@
+name: logreg
+args:
+  use_domain_specific_bias: true
+  use_direct_residualization: false
+  use_gradient_reversal: false
+  use_domain_specific_normalization: true
+  hidden_size: 64
+  regularization_constant: 1e-4
