@@ -1,3 +1,5 @@
 name: bow_single_batch
 args:
   vocab_size: ${vocab_size}
+  batch_size: -1
+  num_workers: -1

@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - override /dataset: bow
+  - override /output: [acc, lexicon]
+
+trainer: logreg

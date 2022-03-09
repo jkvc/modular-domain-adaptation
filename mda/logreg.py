@@ -13,13 +13,12 @@ def train_logreg_model(
     dataset: MultiDomainDataset,
     num_epoch: int = 5000,
     learning_rate: float = 1e-1,
-    num_dataloader_worker=6,
 ):
     optimizer = SGD(model.parameters(), lr=learning_rate, weight_decay=0)
 
     model.train()
     for e in trange(num_epoch):
-        loader = dataset.get_loader(num_worker=num_dataloader_worker)
+        loader = dataset.get_loader()
         for i, batch in enumerate(loader):
             optimizer.zero_grad()
             pred_batch = model(batch)

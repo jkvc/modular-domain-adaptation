@@ -19,13 +19,15 @@ logger = logging.getLogger(__name__)
 class BagOfWordsSingleBatchDataset(MultiDomainDataset):
     def __init__(
         self,
+        batch_size: int,
+        num_workers: int,
         collection: DataCollection,
         use_domain_strs: Optional[List[str]] = None,
         vocab_size: Optional[int] = None,
         vocab_override: Optional[List[str]] = None,
         class_distribution_override: Optional[Dict[str, List[float]]] = None,
     ) -> None:
-        super().__init__(collection, use_domain_strs)
+        super().__init__(batch_size, num_workers, collection, use_domain_strs)
         self.all_sample_tokens = self.get_all_sample_tokens()
 
         if vocab_override:
@@ -104,7 +106,10 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
         batch = {k: v.to(AUTO_DEVICE) for k, v in batch.items()}
         return batch
 
-    def get_loader(self, num_worker: int) -> Iterable[Dict[str, torch.Tensor]]:
+    def get_loader(
+        self,
+    ) -> Iterable[Dict[str, torch.Tensor]]:
+        assert self.batch_size == -1
         return _single_batch_iterator(self.batch)
 
     def computed_asset(self) -> Dict:

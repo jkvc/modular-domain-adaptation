@@ -9,3 +9,4 @@ defaults:
 
 vocab_size: 5000
 working_dir: wkdir
+trainer: ???

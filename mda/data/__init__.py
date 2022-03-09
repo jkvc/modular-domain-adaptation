@@ -9,11 +9,15 @@ from mda.registry import FromConfigBase, Registry, import_all
 class MultiDomainDataset(FromConfigBase):
     def __init__(
         self,
+        batch_size: int,
+        num_workers: int,
         collection: DataCollection,
         use_domain_strs: Optional[List[str]] = None,
     ) -> None:
         super().__init__()
         self.collection: DataCollection = collection
+        self.batch_size = batch_size
+        self.num_workers = num_workers
         if use_domain_strs is None:
             self.filtered_samples: List[DataSample] = list(
                 self.collection.samples.values()
@@ -30,7 +34,7 @@ class MultiDomainDataset(FromConfigBase):
             ]
             self.domain_strs = use_domain_strs
 
-    def get_loader(self, num_worker: int) -> Iterable[Dict[str, torch.Tensor]]:
+    def get_loader(self) -> Iterable[Dict[str, torch.Tensor]]:
         raise NotImplementedError()
 
     def computed_asset(self) -> Dict:

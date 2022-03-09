@@ -6,7 +6,7 @@ import torch
 from mda.data import MultiDomainDataset
 from mda.model import Model
 from mda.model.logreg import LogisticRegressionModel
-from mda.registry import FromConfigBase, Registry, import_all
+from mda.registry import FromConfigBase, Registry
 from mda.util import save_json
 
 from experiments.acc import ModelAccuracy
@@ -40,10 +40,9 @@ class AccOutput(Output):
         self,
         model: Model,
         dataset: MultiDomainDataset,
-        num_dataloader_worker=6,
     ) -> float:
         model.eval()
-        loader = dataset.get_loader(num_worker=num_dataloader_worker)
+        loader = dataset.get_loader()
         num_correct = 0
         num_samples = 0
         for batch in loader:

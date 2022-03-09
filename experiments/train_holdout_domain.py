@@ -16,6 +16,7 @@ from mda.util import (
 from omegaconf import OmegaConf
 
 from experiments.output import OUTPUT_REGISTRY
+from experiments.training import TRAINER_REGISTRY
 
 logger = logging.getLogger(__name__)
 
@@ -83,10 +84,13 @@ def main(config: OmegaConf):
         logger.info(f"built model {model}")
 
         # train
-        train_logreg_model(
-            model,
-            train_dataset,
+        trainer = TRAINER_REGISTRY.from_config(
+            config.trainer,
+            {},
+            model=model,
+            dataset=train_dataset,
         )
+        trainer.run()
 
         # output
         for output_config in config.output.values():
