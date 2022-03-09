@@ -33,6 +33,9 @@ class MultiDomainDataset(FromConfigBase):
     def get_loader(self, num_worker: int) -> Iterable[Dict[str, torch.Tensor]]:
         raise NotImplementedError()
 
+    def computed_asset(self) -> Dict:
+        return {}
+
 
 DATASET_REGISTRY = Registry(MultiDomainDataset)
 import_all(Path(__file__).parent, "mda.data")

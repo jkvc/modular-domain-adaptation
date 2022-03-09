@@ -107,6 +107,9 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
     def get_loader(self, num_worker: int) -> Iterable[Dict[str, torch.Tensor]]:
         return _single_batch_iterator(self.batch)
 
+    def computed_asset(self) -> Dict:
+        return {"vocab_override": self.vocab}
+
 
 class _single_batch_iterator:
     def __init__(self, batch):

@@ -12,8 +12,6 @@ from mda.util import (
     load_json,
     mark_experiment_done,
     mkdirs,
-    save_json,
-    set_random_seed,
 )
 from omegaconf import OmegaConf
 
@@ -29,7 +27,7 @@ def main(config: OmegaConf):
 
     # output_dir
     output_dir = get_full_path(
-        f"{config.working_dir}/train_all/{config.data_collection.name}/{config.model.arch}"
+        f"{config.working_dir}/all_domain/{config.data_collection.name}/{config.model.arch}"
     )
     if is_experiment_done(output_dir):
         return
@@ -64,7 +62,7 @@ def main(config: OmegaConf):
         config.dataset.name,
         config.dataset.args,
         collection=test_collection,
-        vocab_override=train_dataset.vocab,
+        **train_dataset.computed_asset(),
     )
     logger.info(f"built test dataset of {len(test_dataset.filtered_samples)} samples")
 
