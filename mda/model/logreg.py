@@ -16,7 +16,7 @@ class LogisticRegressionModel(Model):
         self,
         vocab_size: int,
         n_classes: int,
-        n_domains: Optional[int],
+        n_domains: Optional[int] = None,
         use_direct_residualization: bool = False,
         use_gradient_reversal: bool = False,
         use_domain_specific_bias: bool = False,

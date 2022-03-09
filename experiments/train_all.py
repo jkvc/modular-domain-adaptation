@@ -3,7 +3,7 @@ import logging
 import hydra
 from mda.data import DATASET_REGISTRY, MultiDomainDataset
 from mda.data.data_collection import DataCollection
-from mda.logreg import eval_logreg_model, train_logreg_model
+from mda.logreg import train_logreg_model
 from mda.model import MODEL_REGISTRY, Model
 from mda.util import (
     AUTO_DEVICE,

@@ -4,7 +4,6 @@ from pathlib import Path
 import pandas as pd
 import torch
 from mda.data import MultiDomainDataset
-from mda.logreg import eval_logreg_model
 from mda.model import Model
 from mda.model.logreg import LogisticRegressionModel
 from mda.registry import FromConfigBase, Registry, import_all
