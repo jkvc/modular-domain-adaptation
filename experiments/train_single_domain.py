@@ -48,7 +48,7 @@ def main(config: OmegaConf):
             f"{config.working_dir}/single_domain/{config.data_collection.name}/{config.model.arch}/{use_domain_str}"
         )
         if is_experiment_done(output_dir):
-            return
+            continue
         logger.info(f"saving all outputs to {output_dir}")
         mkdirs(output_dir, overwrite=True)
 
