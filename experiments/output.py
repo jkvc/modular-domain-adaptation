@@ -54,7 +54,6 @@ class AccOutput(Output):
             pred = torch.argmax(pred_batch["logits"], dim=-1)
             is_correct = pred == batch["class_idx"]
             num_correct += is_correct.sum()
-            break  # fixme
         return (num_correct / num_samples).item()
 
     def execute(self):

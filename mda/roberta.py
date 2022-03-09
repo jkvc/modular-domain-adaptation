@@ -24,4 +24,3 @@ def train_roberta_model(
             loss = pred_batch["loss"]
             loss.backward()
             optimizer.step()
-            return  # fixme
