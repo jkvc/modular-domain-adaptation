@@ -21,7 +21,7 @@ class RecursiveAccuracy(BaseModel):
 
 
 def collect_and_reduce_acc(root_dir: str):
-    files = listdir(root_dir)
+    files = sorted(listdir(root_dir))
     is_leaf = "acc.json" in files
 
     if is_leaf:

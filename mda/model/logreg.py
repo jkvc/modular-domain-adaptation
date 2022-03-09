@@ -71,7 +71,7 @@ class LogisticRegressionModel(Model):
                     sample_idxs = torch.where(batch["domain_idx"] == domain_idx)
                     if len(sample_idxs) == 0:
                         continue
-                bow_batch[sample_idxs] -= bow_batch[sample_idxs].mean(axis=0)
+                    bow_batch[sample_idxs] -= bow_batch[sample_idxs].mean(axis=0)
                 return bow_batch
 
             if not self.training:
