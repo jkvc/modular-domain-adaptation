@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -25,9 +26,14 @@ class LogisticRegressionModel(Model):
     ):
         super().__init__()
 
-        if use_domain_specific_bias or use_gradient_reversal:
+        if (
+            use_domain_specific_bias
+            or use_gradient_reversal
+            or use_direct_residualization
+        ):
             assert n_domains is not None
-        n_domains = 1
+        else:
+            n_domains = 1
 
         self.vocab_size: int = vocab_size
         self.n_classes: int = n_classes
@@ -57,13 +63,26 @@ class LogisticRegressionModel(Model):
         assert vocabsize == self.vocab_size
 
         # normalize word frequency at each domain
-        # this works best if `batch` is the entire dataset
+        # this requires `batch` is the entire dataset
         if self.use_domain_specific_normalization:
-            for domain_idx in range(self.n_domains):
-                sample_idxs = torch.where(batch["domain_idx"] == domain_idx)
-                if len(sample_idxs) == 0:
-                    continue
-                bow[sample_idxs] -= bow[sample_idxs].mean(axis=0)
+
+            def normalize_batch(bow_batch):
+                for domain_idx in range(self.n_domains):
+                    sample_idxs = torch.where(batch["domain_idx"] == domain_idx)
+                    if len(sample_idxs) == 0:
+                        continue
+                bow_batch[sample_idxs] -= bow_batch[sample_idxs].mean(axis=0)
+                return bow_batch
+
+            if not self.training:
+                bow = normalize_batch(bow)
+            elif not hasattr(self, "bow_full_batch_normed"):
+                self.bow_full_batch = bow
+                self.bow_full_batch_normed = normalize_batch(bow)
+                bow = self.bow_full_batch_normed
+            else:
+                assert (self.bow_full_batch == bow).all()
+                bow = self.bow_full_batch_normed
 
         e = self.tff(bow)
         logits = self.yout(e)
@@ -74,8 +93,10 @@ class LogisticRegressionModel(Model):
 
         if self.use_direct_residualization:
             if self.training:
-                domain_onehot = torch.eye(self.n_sources)[batch["domain_idx"]].to(
-                    torch.float
+                domain_onehot = (
+                    torch.eye(self.n_domains)[batch["domain_idx"]]
+                    .to(torch.float)
+                    .to(bow.device)
                 )
                 class_pred_logits = self.cff(domain_onehot)
                 logits = logits + class_pred_logits
@@ -115,12 +136,18 @@ class LogisticRegressionModel(Model):
             self.yout.weight.data.detach().cpu().numpy()
             @ self.tff.weight.data.detach().cpu().numpy()
         )
-        nclass, vocabsize = weights.shape
-        assert vocabsize == len(vocab)
-        assert len(colnames) == nclass
+        return elicit_lexicon(weights, vocab, colnames)
 
-        df = pd.DataFrame()
-        df["word"] = vocab
-        for c in range(nclass):
-            df[colnames[c]] = weights[c]
-        return df
+
+def elicit_lexicon(
+    weights: np.ndarray, vocab: List[str], colnames: List[str]
+) -> pd.DataFrame:
+    nclass, vocabsize = weights.shape
+    assert len(vocab) == vocabsize
+    assert len(colnames) == nclass
+
+    df = pd.DataFrame()
+    df["word"] = vocab
+    for c in range(nclass):
+        df[colnames[c]] = weights[c]
+    return df

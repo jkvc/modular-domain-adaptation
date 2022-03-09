@@ -1,0 +1,3 @@
+name: amazon
+train_path: data/amazon.train.json
+test_path: data/amazon.test.json

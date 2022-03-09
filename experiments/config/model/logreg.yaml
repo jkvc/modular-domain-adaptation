@@ -1,3 +1,4 @@
+arch: logreg
 name: logreg
 args:
   use_domain_specific_bias: false

@@ -5,5 +5,7 @@ defaults:
   - data_collection: ???
   - dataset: ???
   - model: ???
+  - output: [acc]
 
 vocab_size: 5000
+working_dir: wkdir

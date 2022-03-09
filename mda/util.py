@@ -4,7 +4,7 @@ import pickle
 import random
 import shutil
 from multiprocessing import Pool, cpu_count
-from os import mkdir
+from os import makedirs, mkdir
 from pathlib import Path
 from typing import List
 
@@ -49,10 +49,19 @@ def load_json(save_path: str):
         return json.load(f)
 
 
-def mkdir_overwrite(path: str):
+def mkdirs(path: str, overwrite: bool = False):
     if exists(path):
+        assert overwrite, f"{path} already exists"
         shutil.rmtree(path)
-    mkdir(path)
+    makedirs(path)
+
+
+def mark_experiment_done(path: str):
+    write_str_list_as_txt(["done"], f"{path}/.is_done")
+
+
+def is_experiment_done(path: str) -> bool:
+    return exists(f"{path}/.is_done")
 
 
 DEFAULT_FIGURE_DPI = 300

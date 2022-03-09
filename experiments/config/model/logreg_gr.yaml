@@ -1,3 +1,4 @@
+arch: logreg_gr
 name: logreg
 args:
   use_domain_specific_bias: false
@@ -6,3 +7,4 @@ args:
   use_domain_specific_normalization: false
   hidden_size: 64
   regularization_constant: 1e-4
+  vocab_size: ${vocab_size}
