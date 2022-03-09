@@ -7,7 +7,8 @@ from mda.data import MultiDomainDataset
 from mda.model import Model
 from mda.model.logreg import LogisticRegressionModel
 from mda.registry import FromConfigBase, Registry
-from mda.util import save_json
+from mda.util import AUTO_DEVICE, save_json
+from tqdm import tqdm
 
 from experiments.acc import ModelAccuracy
 
@@ -45,13 +46,15 @@ class AccOutput(Output):
         loader = dataset.get_loader()
         num_correct = 0
         num_samples = 0
-        for batch in loader:
-            num_samples += len(batch["bow"])
+        for batch in tqdm(loader):
+            num_samples += len(batch["class_idx"])
             with torch.no_grad():
+                batch = {k: v.to(AUTO_DEVICE) for k, v in batch.items()}
                 pred_batch = model(batch)
             pred = torch.argmax(pred_batch["logits"], dim=-1)
             is_correct = pred == batch["class_idx"]
             num_correct += is_correct.sum()
+            break  # fixme
         return (num_correct / num_samples).item()
 
     def execute(self):
@@ -70,3 +73,9 @@ class LexiconOutput(Output):
             colnames=self.train_dataset.collection.class_strs,
         )
         lexicon_pd.to_csv(f"{self.output_dir}/lexicon.csv")
+
+
+@OUTPUT_REGISTRY.register("checkpoint")
+class CheckpointOutput(Output):
+    def execute(self):
+        torch.save(self.model.state_dict(), f"{self.output_dir}/checkpoint.pth")

@@ -16,7 +16,7 @@ from mda.util import (
 from omegaconf import OmegaConf
 
 from experiments.output import OUTPUT_REGISTRY
-from experiments.training import TRAINER_REGISTRY
+from experiments.trainer import TRAINER_REGISTRY
 
 logger = logging.getLogger(__name__)
 

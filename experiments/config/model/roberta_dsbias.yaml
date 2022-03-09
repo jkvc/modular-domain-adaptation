@@ -1,0 +1,7 @@
+arch: roberta_dsbias
+name: roberta
+args:
+  dropout_p: 0.2
+  use_domain_specific_bias: true
+  use_direct_residualization: false
+  use_gradient_reversal: false

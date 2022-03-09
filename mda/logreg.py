@@ -1,5 +1,3 @@
-import torch
-from pydantic import BaseModel
 from torch.optim import SGD
 from tqdm import trange
 

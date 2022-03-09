@@ -62,7 +62,7 @@ class RobertaClassifier(Model):
 
         self.cout = nn.Sequential(
             ReversalLayer(),
-            nn.Linear(ROBERAT_EMB_SIZE, self.n_sources),
+            nn.Linear(ROBERAT_EMB_SIZE, self.n_domains),
         )
 
     def forward(self, batch: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:

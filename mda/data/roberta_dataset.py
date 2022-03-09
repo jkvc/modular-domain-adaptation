@@ -59,7 +59,9 @@ class RobertaTokenizeDataset(MultiDomainDataset, Dataset):
             "roberta_tokens": roberta_tokens,
             "class_idx": sample.class_idx if sample.class_idx is not None else -1,
             "domain_idx": self.domain_str2domain_idx[sample.domain_str],
-            "class_dist": torch.FloatTensor(self.class_distribution[sample.domain_str]),
+            "class_distribution": torch.FloatTensor(
+                self.class_distribution[sample.domain_str]
+            ),
         }
 
     def get_loader(self) -> Iterable[Dict[str, torch.Tensor]]:

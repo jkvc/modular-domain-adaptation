@@ -1,0 +1,7 @@
+arch: roberta_gr
+name: roberta
+args:
+  dropout_p: 0.2
+  use_domain_specific_bias: false
+  use_direct_residualization: false
+  use_gradient_reversal: true
