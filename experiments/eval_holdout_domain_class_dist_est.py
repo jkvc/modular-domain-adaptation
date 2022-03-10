@@ -25,7 +25,7 @@ from experiments.acc import ModelAccuracy, compute_accs
 logger = logging.getLogger(__name__)
 
 
-@hydra.main(config_path="config", config_name="adapt")
+@hydra.main(config_path="config", config_name="class_dist_est")
 def main(config: OmegaConf):
     config = OmegaConf.create(OmegaConf.to_container(config, resolve=True))
     logger.info(f"\n{OmegaConf.to_yaml(config, resolve=True)}")
