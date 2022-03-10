@@ -31,6 +31,7 @@ class Registry:
             assert cls.__name__ not in self.class_names
             self.registry[name] = cls
             self.class_names.add(cls.__name__)
+            return cls
 
         return _register_cls
 

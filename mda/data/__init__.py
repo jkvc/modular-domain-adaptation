@@ -13,11 +13,13 @@ class MultiDomainDataset(FromConfigBase):
         num_workers: int,
         collection: DataCollection,
         use_domain_strs: Optional[List[str]] = None,
+        class_distribution_override: Optional[Dict[str, List[float]]] = None,
     ) -> None:
         super().__init__()
         self.collection: DataCollection = collection
         self.batch_size = batch_size
         self.num_workers = num_workers
+
         if use_domain_strs is None:
             self.filtered_samples: List[DataSample] = list(
                 self.collection.samples.values()
@@ -33,6 +35,13 @@ class MultiDomainDataset(FromConfigBase):
                 if sample.domain_str in use_domain_strs
             ]
             self.domain_strs = use_domain_strs
+
+        if class_distribution_override:
+            self.class_distribution: Dict[
+                str, List[float]
+            ] = class_distribution_override
+        else:
+            self.class_distribution: Dict[str, List[float]] = self.collection.class_dist
 
     def get_loader(self) -> Iterable[Dict[str, torch.Tensor]]:
         raise NotImplementedError()

@@ -2,6 +2,5 @@
 
 defaults:
   - override /dataset: roberta
-  - override /output: [acc, checkpoint]
 
 trainer: roberta

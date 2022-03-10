@@ -12,10 +12,11 @@ from mda.util import (
     load_json,
     mark_experiment_done,
     mkdirs,
+    save_json,
 )
 from omegaconf import OmegaConf
 
-from experiments.output import OUTPUT_REGISTRY
+from experiments.acc import compute_accs
 from experiments.trainer import TRAINER_REGISTRY
 
 logger = logging.getLogger(__name__)
@@ -85,18 +86,12 @@ def main(config: OmegaConf):
     )
     trainer.run()
 
-    # output
-    for output_config in config.output.values():
-        output = OUTPUT_REGISTRY.from_config(
-            output_config.name,
-            output_config.args,
-            train_dataset=train_dataset,
-            test_dataset=test_dataset,
-            model=model,
-            output_dir=output_dir,
-        )
-        logger.info(f"executing output {output_config.name}")
-        output.execute()
+    # log model
+    model.to_logdir(output_dir)
+
+    # save acc
+    acc = compute_accs(model, train_dataset, test_dataset)
+    save_json(acc.dict(), f"{output_dir}/acc.json")
 
     mark_experiment_done(output_dir)
 

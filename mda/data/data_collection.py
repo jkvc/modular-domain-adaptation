@@ -26,17 +26,24 @@ class DataCollection(BaseModel):
         self.samples[sample.id] = sample
 
     def populate_class_distribution(self) -> None:
-        domain2count = {
-            domain_str: (np.zeros((len(self.class_strs),)) + 1e-8)
-            for domain_str in self.domain_strs
-        }
-        for s in self.samples.values():
-            domain2count[s.domain_str][s.class_idx] += 1
-        domain2prop = {
-            domain: (count / count.sum()).tolist()
-            for domain, count in domain2count.items()
-        }
-        self.class_dist = domain2prop
+        self.class_dist = compute_class_distribution(
+            self.samples.values(), len(self.class_strs)
+        )
+
+
+def compute_class_distribution(
+    samples: List[DataSample], n_classes: int
+) -> Dict[str, List[float]]:
+    domain_strs = set(s.domain_str for s in samples)
+    domain2count = {
+        domain_str: (np.zeros((n_classes,)) + 1e-8) for domain_str in domain_strs
+    }
+    for s in samples:
+        domain2count[s.domain_str][s.class_idx] += 1
+    domain2prop = {
+        domain: (count / count.sum()).tolist() for domain, count in domain2count.items()
+    }
+    return domain2prop
 
 
 def create_random_split(

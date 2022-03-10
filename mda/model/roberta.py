@@ -87,22 +87,27 @@ class RobertaClassifier(Model):
                 class_pred_logits = self.cff(domain_onehot)
                 logits = logits + class_pred_logits
 
-        class_idx = batch["class_idx"]
-        loss = nnf.cross_entropy(logits, class_idx, reduction="none")
+        batch["logits"] = logits
 
-        if self.use_gradient_reversal:
-            if self.training:
-                confound_logits = self.cout(e)
-                domain_idx = batch["domain_idx"]
-                confound_loss = nnf.cross_entropy(
-                    confound_logits, domain_idx, reduction="none"
-                )
-                loss = loss + confound_loss
-        loss = loss.mean()
-        batch.update(
-            {
-                "logits": logits,
-                "loss": loss,
-            }
-        )
+        if self.training:
+            class_idx = batch["class_idx"]
+            loss = nnf.cross_entropy(logits, class_idx, reduction="none")
+
+            if self.use_gradient_reversal:
+                if self.training:
+                    confound_logits = self.cout(e)
+                    domain_idx = batch["domain_idx"]
+                    confound_loss = nnf.cross_entropy(
+                        confound_logits, domain_idx, reduction="none"
+                    )
+                    loss = loss + confound_loss
+            loss = loss.mean()
+            batch["loss"] = loss
+
         return batch
+
+    def to_logdir(self, logdir: str):
+        torch.save(self.state_dict(), f"{logdir}/checkpoint.pth")
+
+    def from_logdir(self, log_dir: str):
+        self.load_state_dict(torch.load(f"{log_dir}/checkpoint.pth"))

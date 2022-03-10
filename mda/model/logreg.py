@@ -1,13 +1,17 @@
-from typing import Dict, List, Optional
+import logging
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as nnf
+from mda.data import MultiDomainDataset
 from mda.model.common import ReversalLayer
 
 from . import MODEL_REGISTRY, Model
+
+logger = logging.getLogger(__name__)
 
 
 @MODEL_REGISTRY.register("logreg")
@@ -57,7 +61,14 @@ class LogisticRegressionModel(Model):
             nn.Linear(self.hidden_size, self.n_domains),
         )
 
-    def forward(self, batch: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    def forward(
+        self, batch: Dict[str, Union[torch.Tensor, Any]]
+    ) -> Dict[str, torch.Tensor]:
+        assert "class_strs" in batch
+        assert "vocab" in batch
+        self.class_strs = batch["class_strs"]
+        self.vocab = batch["vocab"]
+
         bow = batch["bow"].to(torch.float)
         batchsize, vocabsize = bow.shape
         assert vocabsize == self.vocab_size
@@ -101,32 +112,31 @@ class LogisticRegressionModel(Model):
                 class_pred_logits = self.cff(domain_onehot)
                 logits = logits + class_pred_logits
 
-        class_idx = batch["class_idx"]
-        loss = nnf.cross_entropy(logits, class_idx, reduction="none")
+        batch["logits"] = logits
 
-        if self.use_gradient_reversal:
-            if self.training:
-                confound_logits = self.cout(e)
-                domain_idx = batch["domain_idx"]
-                confound_loss = nnf.cross_entropy(
-                    confound_logits, domain_idx, reduction="none"
-                )
-                loss = loss + confound_loss
+        if self.training:
+            class_idx = batch["class_idx"]
+            loss = nnf.cross_entropy(logits, class_idx, reduction="none")
 
-        # L1 regularization on t weights only
-        loss = (
-            loss
-            + torch.abs(self.yout.weight @ self.tff.weight).sum()
-            * self.regularization_constant
-        )
-        loss = loss.mean()
+            if self.use_gradient_reversal:
+                if self.training:
+                    confound_logits = self.cout(e)
+                    domain_idx = batch["domain_idx"]
+                    confound_loss = nnf.cross_entropy(
+                        confound_logits, domain_idx, reduction="none"
+                    )
+                    loss = loss + confound_loss
 
-        batch.update(
-            {
-                "logits": logits,
-                "loss": loss,
-            }
-        )
+            # L1 regularization on t weights only
+            loss = (
+                loss
+                + torch.abs(self.yout.weight @ self.tff.weight).sum()
+                * self.regularization_constant
+            )
+            loss = loss.mean()
+
+            batch["loss"] = loss
+
         return batch
 
     def get_weighted_lexicon(
@@ -137,6 +147,101 @@ class LogisticRegressionModel(Model):
             @ self.tff.weight.data.detach().cpu().numpy()
         )
         return elicit_lexicon(weights, vocab, colnames)
+
+    def to_logdir(self, logdir: str):
+        lexicon_pd: pd.DataFrame = self.get_weighted_lexicon(
+            vocab=self.vocab,
+            colnames=self.class_strs,
+        )
+        lexicon_pd.to_csv(f"{logdir}/lexicon.csv")
+
+    def from_logdir(self, log_dir: str):
+        self.single_matrix_model = LogisticRegressionSingleWeightMatrixModel(
+            vocab_size=self.vocab_size,
+            n_classes=self.n_classes,
+            n_domains=self.n_domains,
+            use_domain_specific_bias=self.use_domain_specific_bias,
+            use_domain_specific_normalization=self.use_domain_specific_normalization,
+        ).to(self.tff.weight.device)
+        df = pd.read_csv(f"{log_dir}/lexicon.csv", index_col=0)
+        self.single_matrix_model.load_lexicon(df)
+        logger.info(
+            f"loaded weights from lexicon csv, vocab_size {len(df)} n_classes {len(df.columns)-1}"
+        )
+        self.train = self.single_matrix_model.train
+        self.forward = self.single_matrix_model.forward
+
+
+class LogisticRegressionSingleWeightMatrixModel(Model):
+    """
+    Similar to `LogisticRegressionModel`, except the singular weight matrix
+    This is useful for evaluating an existing lexicon
+    """
+
+    def __init__(
+        self,
+        vocab_size: int,
+        n_classes: int,
+        n_domains: Optional[int] = None,
+        use_domain_specific_bias: bool = False,
+        use_domain_specific_normalization: bool = False,
+    ):
+        super().__init__()
+
+        if use_domain_specific_bias:
+            assert n_domains is not None
+        else:
+            n_domains = 1
+
+        self.vocab_size: int = vocab_size
+        self.n_classes: int = n_classes
+        self.n_domains: int = n_domains
+        self.use_domain_specific_bias: bool = use_domain_specific_bias
+        self.use_domain_specific_normalization: bool = use_domain_specific_normalization
+        self.ff = nn.Linear(self.vocab_size, self.n_classes, bias=False)
+
+        self.eval()
+
+    def train(self, is_train=True):
+        if is_train:
+            raise NotImplementedError(
+                "LogisticRegressionSingleWeightMatrixModel does not support train()"
+            )
+        super().train(False)
+
+    def forward(self, batch: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        assert not self.training
+
+        bow = batch["bow"].to(torch.float)
+        batchsize, vocabsize = bow.shape
+        assert vocabsize == self.vocab_size
+
+        # test time only, the whole batch is in the same domain
+        if self.use_domain_specific_normalization:
+            assert (batch["domain_idx"] == batch["domain_idx"][0]).all()
+            bow -= bow.mean(axis=0)
+
+        logits = self.ff(bow)
+
+        if self.use_domain_specific_bias:
+            class_distribution = batch["class_distribution"].to(torch.float)
+            logits = logits + torch.log(class_distribution)
+
+        batch["logits"] = logits
+        return batch
+
+    def load_lexicon(self, df: pd.DataFrame):
+        class_strs = [colname for colname in df.columns if colname != "word"]
+        n_classes = len(class_strs)
+        vocab_size = len(df)
+
+        weight_matrix = np.zeros((n_classes, vocab_size))
+        for class_idx, class_str in enumerate(class_strs):
+            weight_matrix[class_idx] = df[class_str]
+
+        with torch.no_grad():
+            self.ff.weight.copy_(torch.FloatTensor(weight_matrix))
+            self.ff.weight.requires_grad = False
 
 
 def elicit_lexicon(

@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - base
+
+working_dir: wkdir
+n_trial: 5
+n_labeled_samples: ???

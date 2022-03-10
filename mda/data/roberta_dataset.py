@@ -27,14 +27,13 @@ class RobertaTokenizeDataset(MultiDomainDataset, Dataset):
         use_domain_strs: Optional[List[str]] = None,
         class_distribution_override: Optional[Dict[str, List[float]]] = None,
     ) -> None:
-        super().__init__(batch_size, num_workers, collection, use_domain_strs)
-
-        if class_distribution_override:
-            self.class_distribution: Dict[
-                str, List[float]
-            ] = class_distribution_override
-        else:
-            self.class_distribution: Dict[str, List[float]] = self.collection.class_dist
+        super().__init__(
+            batch_size,
+            num_workers,
+            collection,
+            use_domain_strs,
+            class_distribution_override,
+        )
 
         self.tokenizer = RobertaTokenizerFast.from_pretrained("roberta-base")
         self.domain_str2domain_idx = {

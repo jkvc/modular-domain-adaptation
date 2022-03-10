@@ -5,7 +5,9 @@ from typing import Dict, Iterable, List, Literal, Optional
 
 import nltk
 import numpy as np
+import pandas as pd
 import torch
+from genericpath import exists
 from mda.data.data_collection import DataCollection
 from mda.util import AUTO_DEVICE
 from nltk.corpus import stopwords
@@ -13,6 +15,13 @@ from nltk.corpus import stopwords
 from . import DATASET_REGISTRY, MultiDomainDataset
 
 logger = logging.getLogger(__name__)
+
+
+def get_vocab_from_lexicon_csv(log_dir) -> Optional[List[str]]:
+    if not exists(f"{log_dir}/lexicon.csv"):
+        return None
+    df = pd.read_csv(f"{log_dir}/lexicon.csv")
+    return df["word"].tolist()
 
 
 @DATASET_REGISTRY.register("bow_single_batch")
@@ -27,7 +36,13 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
         vocab_override: Optional[List[str]] = None,
         class_distribution_override: Optional[Dict[str, List[float]]] = None,
     ) -> None:
-        super().__init__(batch_size, num_workers, collection, use_domain_strs)
+        super().__init__(
+            batch_size,
+            num_workers,
+            collection,
+            use_domain_strs,
+            class_distribution_override,
+        )
         self.all_sample_tokens = self.get_all_sample_tokens()
 
         if vocab_override:
@@ -36,13 +51,6 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
         else:
             logger.info(f"building vocab of size {vocab_size}")
             self.vocab = self.build_vocab(vocab_size)
-
-        if class_distribution_override:
-            self.class_distribution: Dict[
-                str, List[float]
-            ] = class_distribution_override
-        else:
-            self.class_distribution: Dict[str, List[float]] = self.collection.class_dist
 
         self.batch = self.build_batch()
 
@@ -55,7 +63,7 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
 
         all_sample_tokens: List[List[str]] = []
         for sample in self.filtered_samples:
-            text = sample.text
+            text = sample.text.lower()
             nopunc = re.sub(r"[^\w\s]", "", text)
             tokens = nopunc.split()
             tokens = [
@@ -104,6 +112,12 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
             "domain_idx": domain_idx.to(torch.long),
         }
         batch = {k: v.to(AUTO_DEVICE) for k, v in batch.items()}
+        batch.update(
+            {
+                "class_strs": self.collection.class_strs,
+                "vocab": self.vocab,
+            }
+        )
         return batch
 
     def get_loader(
