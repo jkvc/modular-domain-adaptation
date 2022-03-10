@@ -7,7 +7,6 @@ from mda.logreg import train_logreg_model
 from mda.model import MODEL_REGISTRY, Model
 from mda.util import (
     AUTO_DEVICE,
-    get_full_path,
     is_experiment_done,
     load_json,
     mark_experiment_done,
@@ -15,6 +14,7 @@ from mda.util import (
     save_json,
 )
 from omegaconf import OmegaConf
+from repo_root import get_full_path
 
 from experiments.acc import compute_accs
 from experiments.trainer import TRAINER_REGISTRY

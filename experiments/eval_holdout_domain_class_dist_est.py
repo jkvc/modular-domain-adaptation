@@ -9,7 +9,6 @@ from mda.logreg import train_logreg_model
 from mda.model import MODEL_REGISTRY, Model
 from mda.util import (
     AUTO_DEVICE,
-    get_full_path,
     is_experiment_done,
     load_json,
     mark_experiment_done,
@@ -17,14 +16,14 @@ from mda.util import (
     save_json,
 )
 from omegaconf import OmegaConf
+from repo_root import get_full_path
 
 from experiments.acc import compute_accs
-from experiments.trainer import TRAINER_REGISTRY
 
 logger = logging.getLogger(__name__)
 
 
-@hydra.main(config_path="config", config_name="class_dist_estimation")
+@hydra.main(config_path="config", config_name="adapt")
 def main(config: OmegaConf):
     config = OmegaConf.create(OmegaConf.to_container(config, resolve=True))
     logger.info(f"\n{OmegaConf.to_yaml(config, resolve=True)}")

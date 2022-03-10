@@ -1,11 +1,9 @@
 import json
-import os
 import pickle
 import random
 import shutil
 from multiprocessing import Pool, cpu_count
 from os import makedirs, mkdir
-from pathlib import Path
 from typing import List
 
 import matplotlib.pyplot as plt
@@ -70,10 +68,6 @@ DEFAULT_FIGURE_DPI = 300
 def save_plt(path: str, dpi: int = DEFAULT_FIGURE_DPI):
     # plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
     plt.savefig(path, dpi=dpi)
-
-
-def get_full_path(rel_path: str) -> str:
-    return os.path.join(Path(__file__).parent.parent, rel_path)
 
 
 def set_random_seed(seed: int):

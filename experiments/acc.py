@@ -9,8 +9,9 @@ from typing import Dict, List, Optional, Union
 import torch
 from mda.data import MultiDomainDataset
 from mda.model import Model
-from mda.util import AUTO_DEVICE, get_full_path, load_json, save_json
+from mda.util import AUTO_DEVICE, load_json, save_json
 from pydantic import BaseModel
+from repo_root import get_full_path
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)

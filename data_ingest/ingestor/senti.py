@@ -8,7 +8,8 @@ from typing import List
 
 import pandas as pd
 from mda.data.data_collection import DataCollection, DataSample, create_random_split
-from mda.util import get_full_path, read_txt_as_str_list
+from mda.util import read_txt_as_str_list
+from repo_root import get_full_path
 from tqdm import tqdm
 
 from . import INGESTOR_REGISTRY, Ingestor

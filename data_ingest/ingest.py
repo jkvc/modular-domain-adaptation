@@ -2,8 +2,9 @@ import logging
 
 import hydra
 from mda.data.data_collection import DataCollection
-from mda.util import get_full_path, save_json, set_random_seed
+from mda.util import save_json, set_random_seed
 from omegaconf import OmegaConf
+from repo_root import get_full_path
 
 from data_ingest.ingestor import INGESTOR_REGISTRY
 

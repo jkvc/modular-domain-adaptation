@@ -2,7 +2,8 @@ import logging
 from typing import Tuple
 
 from mda.data.data_collection import DataCollection, DataSample
-from mda.util import get_full_path, load_json
+from mda.util import load_json
+from repo_root import get_full_path
 
 from . import INGESTOR_REGISTRY, Ingestor
 
