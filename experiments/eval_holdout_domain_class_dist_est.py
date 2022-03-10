@@ -2,6 +2,7 @@ import logging
 import random
 
 import hydra
+import torch
 from mda.data import DATASET_REGISTRY, MultiDomainDataset
 from mda.data.bow_dataset import get_vocab_from_lexicon_csv
 from mda.data.data_collection import DataCollection, compute_class_distribution
@@ -17,8 +18,9 @@ from mda.util import (
 )
 from omegaconf import OmegaConf
 from repo_root import get_full_path
+from tqdm import tqdm
 
-from experiments.acc import compute_accs
+from experiments.acc import ModelAccuracy, compute_accs
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +50,44 @@ def main(config: OmegaConf):
         )
         logger.info(f"loading model from checkpoint {model_checkpoint_dir}")
 
+        # load model
+        model: Model = MODEL_REGISTRY.from_config(
+            config.model.name,
+            config.model.args,
+            n_classes=n_classes,
+            n_domains=n_domains,
+        ).to(AUTO_DEVICE)
+        logger.info("loading model from logdir")
+        model.from_logdir(model_checkpoint_dir)
+
+        # turn off dsbias, predict once, then add dsbias for each trial later
+        model.use_domain_specific_bias = False
+        model.eval()
+
+        # eval dataset
+        eval_dataset: MultiDomainDataset = DATASET_REGISTRY.from_config(
+            config.dataset.name,
+            config.dataset.args,
+            collection=train_collection,
+            use_domain_strs=[holdout_domain],
+            vocab_override=get_vocab_from_lexicon_csv(model_checkpoint_dir),
+        )
+
+        loader = eval_dataset.get_loader()
+        pred_logits = []
+        pred_class_idx = []
+        for batch in tqdm(loader):
+            with torch.no_grad():
+                batch = {
+                    k: (v.to(AUTO_DEVICE) if isinstance(v, torch.Tensor) else v)
+                    for k, v in batch.items()
+                }
+                pred_batch = model(batch)
+                pred_logits.append(pred_batch["logits"])
+                pred_class_idx.append(pred_batch["class_idx"])
+        pred_logits = torch.cat(pred_logits, dim=0)
+        pred_class_idx = torch.cat(pred_class_idx, dim=0)
+
         for trial_idx in range(config.n_trial):
             # output_dir
             output_dir = get_full_path(
@@ -69,30 +109,18 @@ def main(config: OmegaConf):
             )
             class_distribution_override = compute_class_distribution(
                 chosen_samples, len(train_collection.class_strs)
-            )
-
-            # eval dataset
-            eval_dataset: MultiDomainDataset = DATASET_REGISTRY.from_config(
-                config.dataset.name,
-                config.dataset.args,
-                collection=train_collection,
-                use_domain_strs=[holdout_domain],
-                class_distribution_override=class_distribution_override,
-                vocab_override=get_vocab_from_lexicon_csv(model_checkpoint_dir),
-            )
-
-            # load model
-            model: Model = MODEL_REGISTRY.from_config(
-                config.model.name,
-                config.model.args,
-                n_classes=n_classes,
-                n_domains=n_domains,
+            )[holdout_domain]
+            class_distribution_override = torch.FloatTensor(
+                class_distribution_override
             ).to(AUTO_DEVICE)
-            logger.info("loading model from logdir")
-            model.from_logdir(model_checkpoint_dir)
+            trial_logits = pred_logits + torch.log(class_distribution_override)
+            trial_pred = torch.argmax(trial_logits, dim=-1)
+            is_correct = trial_pred == pred_class_idx
+            num_correct = is_correct.sum()
 
             # eval, save acc
-            acc = compute_accs(model, None, eval_dataset)
+            acc = (num_correct / len(pred_class_idx)).item()
+            acc = ModelAccuracy(train_acc=0, test_acc=acc)
             save_json(acc.dict(), f"{output_dir}/acc.json")
 
             mark_experiment_done(output_dir)
