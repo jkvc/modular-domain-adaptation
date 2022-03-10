@@ -117,3 +117,8 @@ python acc.py wkdir/
 ```
 
 This produces `repo_root/wkdir/*_acc.json`. Read or use jq on the json files for numeric results at each reduction level. See `acc.py` for details on the recursive definition of metric and reduction logic.
+
+## Tips
+
+- To use this code base to run experiment with new data, simply define a new ingestor to ingest the new data to the correct `DataCollection` class to be saved as json, then add the necessary configuration files in `config`, and repeat similar run commands.
+- If CUDA out of memory, reduce `batch_size` in `config/dataset/roberta.yaml`.
