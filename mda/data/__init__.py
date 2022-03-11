@@ -37,7 +37,7 @@ class MultiDomainDataset(FromConfigBase):
 
         self.class_distribution: Dict[str, List[float]] = self.collection.class_dist
 
-    def get_loader(self) -> Iterable[Dict[str, torch.Tensor]]:
+    def get_loader(self, shuffle: bool = True) -> Iterable[Dict[str, torch.Tensor]]:
         raise NotImplementedError()
 
     def computed_asset(self) -> Dict:

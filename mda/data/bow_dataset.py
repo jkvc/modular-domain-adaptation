@@ -123,9 +123,7 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
         )
         return batch
 
-    def get_loader(
-        self,
-    ) -> Iterable[Dict[str, torch.Tensor]]:
+    def get_loader(self, shuffle: bool = True) -> Iterable[Dict[str, torch.Tensor]]:
         assert self.batch_size == -1
         return _single_batch_iterator(self.batch)
 

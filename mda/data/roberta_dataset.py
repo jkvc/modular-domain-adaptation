@@ -61,10 +61,10 @@ class RobertaTokenizeDataset(MultiDomainDataset, Dataset):
             ),
         }
 
-    def get_loader(self) -> Iterable[Dict[str, torch.Tensor]]:
+    def get_loader(self, shuffle: bool = True) -> Iterable[Dict[str, torch.Tensor]]:
         return DataLoader(
             dataset=self,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=shuffle,
             num_workers=self.num_workers,
         )
