@@ -2,15 +2,15 @@ import pandas as pd
 import torch
 from tqdm import tqdm
 
-from mda.data import MultiDomainDataset
-from mda.data.bow_dataset import BagOfWordsSingleBatchDataset
-from mda.logreg import train_logreg_model
-from mda.model import Model
-from mda.model.logreg import (
+from .data import MultiDomainDataset
+from .data.bow_dataset import BagOfWordsSingleBatchDataset
+from .logreg import train_logreg_model
+from .model import Model
+from .model.logreg import (
     LogisticRegressionModel,
     LogisticRegressionSingleWeightMatrixModel,
 )
-from mda.util import AUTO_DEVICE
+from .util import AUTO_DEVICE
 
 
 def train_lexicon(

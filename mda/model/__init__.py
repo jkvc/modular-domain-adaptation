@@ -3,7 +3,8 @@ from typing import Dict
 
 import torch
 import torch.nn as nn
-from mda.registry import FromConfigBase, Registry, import_all
+
+from ..registry import FromConfigBase, Registry, import_all
 
 
 class Model(nn.Module, FromConfigBase):

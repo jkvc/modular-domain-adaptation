@@ -1,8 +1,8 @@
 from torch.optim import SGD
 from tqdm import trange
 
-from mda.data import MultiDomainDataset
-from mda.model import Model
+from .data import MultiDomainDataset
+from .model import Model
 
 
 def train_logreg_model(

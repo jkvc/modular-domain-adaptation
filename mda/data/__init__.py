@@ -2,8 +2,9 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
 import torch
-from mda.data.data_collection import DataCollection, DataSample
-from mda.registry import FromConfigBase, Registry, import_all
+
+from ..registry import FromConfigBase, Registry, import_all
+from .data_collection import DataCollection, DataSample
 
 
 class MultiDomainDataset(FromConfigBase):

@@ -8,11 +8,11 @@ import numpy as np
 import pandas as pd
 import torch
 from genericpath import exists
-from mda.data.data_collection import DataCollection
-from mda.util import AUTO_DEVICE
 from nltk.corpus import stopwords
 
+from ..util import AUTO_DEVICE
 from . import DATASET_REGISTRY, MultiDomainDataset
+from .data_collection import DataCollection
 
 logger = logging.getLogger(__name__)
 

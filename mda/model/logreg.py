@@ -6,10 +6,10 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as nnf
-from mda.data import MultiDomainDataset
-from mda.model.common import ReversalLayer
 
+from ..data import MultiDomainDataset
 from . import MODEL_REGISTRY, Model
+from .common import ReversalLayer
 
 logger = logging.getLogger(__name__)
 

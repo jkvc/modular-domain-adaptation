@@ -1,9 +1,9 @@
 from tqdm import tqdm
 from transformers import AdamW
 
-from mda.data import MultiDomainDataset
-from mda.model import Model
-from mda.util import AUTO_DEVICE
+from .data import MultiDomainDataset
+from .model import Model
+from .util import AUTO_DEVICE
 
 
 def train_roberta_model(
