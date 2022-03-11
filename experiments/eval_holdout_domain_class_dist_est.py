@@ -107,13 +107,13 @@ def main(config: OmegaConf):
             chosen_samples = random.sample(
                 candidate_samples, k=config.n_labeled_samples
             )
-            class_distribution_override = compute_class_distribution(
+            class_distribution_estimated = compute_class_distribution(
                 chosen_samples, len(train_collection.class_strs)
             )[holdout_domain]
-            class_distribution_override = torch.FloatTensor(
-                class_distribution_override
+            class_distribution_estimated = torch.FloatTensor(
+                class_distribution_estimated
             ).to(AUTO_DEVICE)
-            trial_logits = pred_logits + torch.log(class_distribution_override)
+            trial_logits = pred_logits + torch.log(class_distribution_estimated)
             trial_pred = torch.argmax(trial_logits, dim=-1)
             is_correct = trial_pred == pred_class_idx
             num_correct = is_correct.sum()

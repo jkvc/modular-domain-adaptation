@@ -25,14 +25,12 @@ class RobertaTokenizeDataset(MultiDomainDataset, Dataset):
         num_workers: int,
         collection: DataCollection,
         use_domain_strs: Optional[List[str]] = None,
-        class_distribution_override: Optional[Dict[str, List[float]]] = None,
     ) -> None:
         super().__init__(
             batch_size,
             num_workers,
             collection,
             use_domain_strs,
-            class_distribution_override,
         )
 
         self.tokenizer = RobertaTokenizerFast.from_pretrained("roberta-base")

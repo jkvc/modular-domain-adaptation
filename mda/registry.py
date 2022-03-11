@@ -17,6 +17,8 @@ class FromConfigBase:
 
 BaseClassType = TypeVar("BaseClassType")
 
+T = TypeVar("T")
+
 
 class Registry:
     def __init__(self, base_class: Type[BaseClassType]):
@@ -25,7 +27,7 @@ class Registry:
         self.class_names = set()
 
     def register(self, name: str):
-        def _register_cls(cls):
+        def _register_cls(cls: T) -> T:
             assert name not in self.registry
             assert issubclass(cls, self.base_class)
             assert cls.__name__ not in self.class_names

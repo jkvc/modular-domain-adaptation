@@ -16,12 +16,29 @@ from . import DATASET_REGISTRY, MultiDomainDataset
 
 logger = logging.getLogger(__name__)
 
+try:
+    _STOPWORDS = set(stopwords.words("english"))
+except LookupError:
+    nltk.download("stopwords")
+    _STOPWORDS = set(stopwords.words("english"))
+
 
 def get_vocab_from_lexicon_csv(log_dir) -> Optional[List[str]]:
     if not exists(f"{log_dir}/lexicon.csv"):
         return None
     df = pd.read_csv(f"{log_dir}/lexicon.csv")
     return df["word"].tolist()
+
+
+def tokenize(text: str) -> List[str]:
+    nopunc = re.sub(r"[^\w\s]", "", text)
+    tokens = nopunc.split()
+    tokens = [
+        w
+        for w in tokens
+        if (not w.startswith("@") and w not in _STOPWORDS and not w.isdigit())
+    ]
+    return tokens
 
 
 @DATASET_REGISTRY.register("bow_single_batch")
@@ -34,14 +51,12 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
         use_domain_strs: Optional[List[str]] = None,
         vocab_size: Optional[int] = None,
         vocab_override: Optional[List[str]] = None,
-        class_distribution_override: Optional[Dict[str, List[float]]] = None,
     ) -> None:
         super().__init__(
             batch_size,
             num_workers,
             collection,
             use_domain_strs,
-            class_distribution_override,
         )
         self.all_sample_tokens = self.get_all_sample_tokens()
 
@@ -55,22 +70,10 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
         self.batch = self.build_batch()
 
     def get_all_sample_tokens(self):
-        try:
-            sws = set(stopwords.words("english"))
-        except LookupError:
-            nltk.download("stopwords")
-            sws = set(stopwords.words("english"))
-
         all_sample_tokens: List[List[str]] = []
         for sample in self.filtered_samples:
             text = sample.text.lower()
-            nopunc = re.sub(r"[^\w\s]", "", text)
-            tokens = nopunc.split()
-            tokens = [
-                w
-                for w in tokens
-                if (not w.startswith("@") and w not in sws and not w.isdigit())
-            ]
+            tokens = tokenize(text)
             all_sample_tokens.append(tokens)
         return all_sample_tokens
 
@@ -133,6 +136,7 @@ class BagOfWordsSingleBatchDataset(MultiDomainDataset):
 class _single_batch_iterator:
     def __init__(self, batch):
         self.batch = batch
+        self.returned = False
 
     def __iter__(self):
         self.returned = False

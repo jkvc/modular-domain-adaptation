@@ -39,6 +39,8 @@ def compute_class_distribution(
         domain_str: (np.zeros((n_classes,)) + 1e-8) for domain_str in domain_strs
     }
     for s in samples:
+        if s.class_idx is None:
+            continue
         domain2count[s.domain_str][s.class_idx] += 1
     domain2prop = {
         domain: (count / count.sum()).tolist() for domain, count in domain2count.items()

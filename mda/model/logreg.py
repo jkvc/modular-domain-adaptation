@@ -216,10 +216,18 @@ class LogisticRegressionSingleWeightMatrixModel(Model):
         batchsize, vocabsize = bow.shape
         assert vocabsize == self.vocab_size
 
-        # test time only, the whole batch is in the same domain
+        # test time only, no cacheing, slower
         if self.use_domain_specific_normalization:
-            assert (batch["domain_idx"] == batch["domain_idx"][0]).all()
-            bow -= bow.mean(axis=0)
+
+            def normalize_batch(bow_batch):
+                for domain_idx in range(self.n_domains):
+                    sample_idxs = torch.where(batch["domain_idx"] == domain_idx)
+                    if len(sample_idxs) == 0:
+                        continue
+                    bow_batch[sample_idxs] -= bow_batch[sample_idxs].mean(axis=0)
+                return bow_batch
+
+            bow = normalize_batch(bow)
 
         logits = self.ff(bow)
 

@@ -13,7 +13,6 @@ class MultiDomainDataset(FromConfigBase):
         num_workers: int,
         collection: DataCollection,
         use_domain_strs: Optional[List[str]] = None,
-        class_distribution_override: Optional[Dict[str, List[float]]] = None,
     ) -> None:
         super().__init__()
         self.collection: DataCollection = collection
@@ -36,12 +35,7 @@ class MultiDomainDataset(FromConfigBase):
             ]
             self.domain_strs = use_domain_strs
 
-        if class_distribution_override:
-            self.class_distribution: Dict[
-                str, List[float]
-            ] = class_distribution_override
-        else:
-            self.class_distribution: Dict[str, List[float]] = self.collection.class_dist
+        self.class_distribution: Dict[str, List[float]] = self.collection.class_dist
 
     def get_loader(self) -> Iterable[Dict[str, torch.Tensor]]:
         raise NotImplementedError()
