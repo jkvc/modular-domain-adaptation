@@ -8,15 +8,27 @@ Using this framework, the model producer trains models using anticipatory domain
 
 ## Installation
 
-Clone this repository and at the repo root run
+Clone this repository and use pip at the repo
 
 ```
 pip install -e .
 ```
 
-CUDA GPUs are supported and used if detected. We recommend using conda and install in a conda environment.
+We recommend using conda. All code is develop using python 3.8. Create a conda environment and install the library within it:
 
-When using newer CUDA versions, please first install the correct version of `torchvision` with as instructed at pytroch's [installation page](https://pytorch.org/get-started/locally/) using pip, before using `pip install -e .`.
+```
+conda create -n mda_env python=3.8
+conda activate mda_env
+pip install -e .
+```
+
+Test out installation is successful, run the following to produce no output:
+
+```
+python -c 'from mda.api import train_lexicon'
+```
+
+CUDA GPUs are supported and used if detected. When using newer CUDA versions, please first install the correct version of `torchvision` with as instructed at pytroch's [installation page](https://pytorch.org/get-started/locally/) using pip, before using `pip install -e .`.
 
 ## Getting Started
 
