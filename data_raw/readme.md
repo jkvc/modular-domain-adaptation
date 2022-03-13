@@ -16,8 +16,7 @@ We use the Arxiv dataset as published on [Kaggle](https://www.kaggle.com/Cornell
 
 ### mfc
 
-We use the Media Frame Corpus by Card et. al. 
-TODO Dallas please fill this in.
+We use the Media Frame Corpus by Card et. al (2015). Please contact Dallas Card for details.
 
 ### senti
 
