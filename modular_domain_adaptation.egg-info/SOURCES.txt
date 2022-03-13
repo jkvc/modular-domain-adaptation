@@ -1,0 +1,7 @@
+LICENSE
+setup.py
+modular_domain_adaptation.egg-info/PKG-INFO
+modular_domain_adaptation.egg-info/SOURCES.txt
+modular_domain_adaptation.egg-info/dependency_links.txt
+modular_domain_adaptation.egg-info/requires.txt
+modular_domain_adaptation.egg-info/top_level.txt

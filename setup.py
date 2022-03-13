@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="mda",
+    name="modular-domain-adaptation",
     version="0.1",
     description="Modular Domain Adaptation is a framework to produce and consume models while addressing the domain misalignment issue.",
     py_modules=["mda"],
