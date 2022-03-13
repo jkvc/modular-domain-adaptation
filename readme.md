@@ -8,17 +8,15 @@ Using this framework, the model producer trains models using anticipatory domain
 
 ## Installation
 
-Use [PyPI](https://pypi.org/project/modular-domain-adaptation/) with python 3.8+:
-
-```
-pip install modular-domain-adaptation
-```
-
-or clone the repository and
+Clone this repository and at the repo root run
 
 ```
 pip install -e .
 ```
+
+CUDA GPUs are supported and used if detected. We recommend using conda and install in a conda environment.
+
+When using newer CUDA versions, please first install the correct version of `torchvision` with as instructed at pytroch's [installation page](https://pytorch.org/get-started/locally/) using pip, before using `pip install -e .`.
 
 ## Getting Started
 
