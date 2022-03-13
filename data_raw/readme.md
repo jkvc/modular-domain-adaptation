@@ -4,7 +4,7 @@ This directory is to contain the raw data before any data preprocessing, as used
 
 ## Data sources
 
-In our experiment, all data is retrieved in Januarary 2021.
+In our experiment, all data is retrieved in March 2021.
 
 ### amazon
 
