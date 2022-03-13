@@ -14,6 +14,12 @@ Use [PyPI](https://pypi.org/project/modular-domain-adaptation/) with python 3.8+
 pip install modular-domain-adaptation
 ```
 
+or clone the repository and
+
+```
+pip install -e .
+```
+
 ## Getting Started
 
 Please see the [demo section](./demo) for usage of the main APIs.
