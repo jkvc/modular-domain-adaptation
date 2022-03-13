@@ -8,4 +8,4 @@ Then run the ingestor to ingest all data to preprocess them to our defined data 
 python ingest.py -m 'ingestor=glob(*)'
 ```
 
-To ingest new dataset, either define an ingestor following the example, or save the data in the format as defined in [DataCollection.py](../mda/data/data_collection.py) to be loaded by the main API.
+To ingest new dataset, either define an ingestor following the example, or save the data in the format as a [DataCollection](../mda/data/data_collection.py) to be loaded by the main API.
