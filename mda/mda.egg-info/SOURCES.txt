@@ -1,0 +1,6 @@
+setup.py
+mda/mda.egg-info/PKG-INFO
+mda/mda.egg-info/SOURCES.txt
+mda/mda.egg-info/dependency_links.txt
+mda/mda.egg-info/requires.txt
+mda/mda.egg-info/top_level.txt

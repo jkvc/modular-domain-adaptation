@@ -1,0 +1,14 @@
+pandas
+torchvision
+nltk
+matplotlib
+transformers
+sklearn
+tensorboard
+hydra-core
+pydantic
+
+[dev]
+pytest>=3.8
+check-manifest
+twine

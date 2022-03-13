@@ -1,0 +1,13 @@
+include *.md
+include *.png
+include *.py
+recursive-include data_ingest *.md
+recursive-include data_ingest *.py
+recursive-include data_ingest *.yaml
+recursive-include data_raw *.md
+recursive-include demo *.ipynb
+recursive-include demo *.md
+recursive-include experiments *.md
+recursive-include experiments *.py
+recursive-include experiments *.yaml
+recursive-include mda *.py
