@@ -10,7 +10,6 @@ To run experiment workflows, first setup environment and and install dependencie
 conda create -n mda python=3.8
 conda develop .
 pip install -e .
-pip install hydra-core pydantic
 ```
 
 ## Data
