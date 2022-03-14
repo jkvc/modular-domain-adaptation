@@ -45,4 +45,13 @@ Please follow the example in `demos` to load, eval, and predict witht them.
 
 ## Citing Modular Domain Adaptation
 
-TODO
+If you find this work useful, please include a citation to the following publication:
+
+```
+@inproceedings{chen.2022.modular,
+  author={Junshen K. Chen and Dallas Card and Dan Jurafsky},
+  title={Modular Domain Adaptation},
+  booktitle={Proceedings of ACL},
+  year={2022},
+}
+```
