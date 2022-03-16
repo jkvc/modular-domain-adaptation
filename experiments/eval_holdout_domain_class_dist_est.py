@@ -27,7 +27,9 @@ logger = logging.getLogger(__name__)
 
 @hydra.main(config_path="config", config_name="class_dist_est")
 def main(config: OmegaConf):
-    config = OmegaConf.create(OmegaConf.to_container(config, resolve=True))
+    config = OmegaConf.create(
+        OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
+    )
     logger.info(f"\n{OmegaConf.to_yaml(config, resolve=True)}")
 
     # load train collection, use holdout source as OOD samples

@@ -5,14 +5,8 @@ from mda.data import DATASET_REGISTRY, MultiDomainDataset
 from mda.data.data_collection import DataCollection
 from mda.logreg import train_logreg_model
 from mda.model import MODEL_REGISTRY, Model
-from mda.util import (
-    AUTO_DEVICE,
-    is_experiment_done,
-    load_json,
-    mark_experiment_done,
-    mkdirs,
-    save_json,
-)
+from mda.util import (AUTO_DEVICE, is_experiment_done, load_json,
+                      mark_experiment_done, mkdirs, save_json)
 from omegaconf import OmegaConf
 from repo_root import get_full_path
 
@@ -24,7 +18,9 @@ logger = logging.getLogger(__name__)
 
 @hydra.main(config_path="config", config_name="base")
 def main(config: OmegaConf):
-    config = OmegaConf.create(OmegaConf.to_container(config, resolve=True))
+    config = OmegaConf.create(
+        OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
+    )
     logger.info(f"\n{OmegaConf.to_yaml(config, resolve=True)}")
 
     # output_dir
