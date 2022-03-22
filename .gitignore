@@ -11,3 +11,6 @@ __pycache__
 
 /*/outputs
 /*/multirun
+
+.DS_Store
+modular_domain_adaptation.egg-info/
