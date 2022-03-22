@@ -1,3 +1,4 @@
+import os
 import logging
 
 import hydra
@@ -25,6 +26,11 @@ def main(config: OmegaConf):
     for split_name, collection in zip(
         ["train", "test"], [train_collection, test_collection]
     ):
+
+        outdir = get_full_path(f"data")
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
+
         dst_path = get_full_path(f"data/{config.ingestor.name}.{split_name}.json")
         save_json(collection.dict(), dst_path)
 
