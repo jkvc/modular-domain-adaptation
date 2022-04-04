@@ -64,7 +64,11 @@ def predict(model: Model, dataset: MultiDomainDataset) -> torch.Tensor:
     probs = []
     for batch in tqdm(dataset.get_loader(shuffle=False)):
         with torch.no_grad():
-            batch = {k: v.to(AUTO_DEVICE) for k, v in batch.items()}
+            batch = {
+                k: v.to(AUTO_DEVICE)
+                for k, v in batch.items()
+                if isinstance(v, torch.Tensor)
+            }
             batch = model(batch)
             probs.append(torch.sigmoid(batch["logits"]))
     probs = torch.cat(probs, dim=0)
