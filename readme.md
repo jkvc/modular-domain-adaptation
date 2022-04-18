@@ -8,13 +8,13 @@ Using this framework, the model producer trains models using anticipatory domain
 
 ## Installation
 
-Clone this repository and use pip at the repo
+Clone this repository and use pip at the repo root
 
 ```
 pip install -e .
 ```
 
-We recommend using conda. All code is develop using python 3.8. Create a conda environment and install the library within it:
+We recommend using conda. All code is developed using python 3.8. Create a conda environment and install the library within it:
 
 ```
 conda create -n mda_env python=3.8
