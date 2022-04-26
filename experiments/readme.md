@@ -14,7 +14,7 @@ pip install -e .
 
 ## Data
 
-This example uses the arXiv dataset. Put the dataset at the correct path. See `repo_root/data_raw` for details on acquiring the data.
+This example uses the arXiv dataset. Put the dataset at the correct path. See `repo_root/data_raw` [readme](https://github.com/jkvc/modular-domain-adaptation/tree/main/data_raw) for details on acquiring the data.
 
 Resultant dir structure should be
 
