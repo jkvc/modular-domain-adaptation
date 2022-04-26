@@ -1,6 +1,6 @@
 # Experiments
 
-This folder contains workflow code for running experiments and producing metrics as present in the paper. This file briefly go over how to run the workflows to reproduce paper results with an example using the Media Frame Corpus (`mfc`).
+This folder contains workflow code for running experiments and producing metrics as present in the paper. This file briefly go over how to run the workflows to reproduce paper results with an example using the arXiv dataset (`arxiv`).
 
 ## Prerequisites
 
@@ -14,34 +14,21 @@ pip install -e .
 
 ## Data
 
-This example uses the Media Frame Corpus. Put the dataset at the correct path. See `repo_root/data_raw` for details on acquiring the data.
+This example uses the arXiv dataset. Put the dataset at the correct path. See `repo_root/data_raw` for details on acquiring the data.
 
 Resultant dir structure should be
 
 ```
 repo_root
     data_raw
-        mfc
-            climate_labeled.json
-            climate_test_sets.json
-            deathpenalty_labeled.json
-            deathpenalty_test_sets.json
-            guncontrol_labeled.json
-            guncontrol_test_sets.json
-            immigration_labeled.json
-            immigration_test_sets.json
-            police_labeled.json
-            police_test_sets.json
-            samesex_labeled.json
-            samesex_test_sets.json
-            tobacco_labeled.json
-            tobacco_test_sets.json
+        arxiv
+            arxiv-metadata-oai-snapshot.json            
 ```
 
 Then ingest the data to `mda` defined json format
 
 ```
-python ../data_ingest/ingest.py ingestor=mfc
+python ../data_ingest/ingest.py ingestor=arxiv
 ```
 
 This produces the formatted dataset json
@@ -49,8 +36,8 @@ This produces the formatted dataset json
 ```
 repo_root
     data
-        mfc.train.json
-        mfc.test.json
+        arxiv.train.json
+        arxiv.test.json
 ```
 
 ## Run Experiment Workflows
@@ -64,8 +51,8 @@ All results are saved to `repo_root/wkdir/`.
 Train a model with all available data in all domains, use the test split to evaluate:
 
 ```
-python train_all.py -m data_collection=mfc +common=logreg 'model=glob(logreg*)'
-python train_all.py -m data_collection=mfc +common=roberta 'model=glob(roberta*)'
+python train_all.py -m data_collection=arxiv +common=logreg 'model=glob(logreg*)'
+python train_all.py -m data_collection=arxiv +common=roberta 'model=glob(roberta*)'
 ```
 
 ### Single domain
@@ -73,8 +60,8 @@ python train_all.py -m data_collection=mfc +common=roberta 'model=glob(roberta*)
 Train with a single domain's samples, use samples from the remaining domains to evaluate the model
 
 ```
-python train_single_domain.py -m data_collection=mfc +common=logreg 'model=glob(logreg*)'
-python train_single_domain.py -m data_collection=mfc +common=roberta 'model=glob(roberta*)'
+python train_single_domain.py -m data_collection=arxiv +common=logreg 'model=glob(logreg*)'
+python train_single_domain.py -m data_collection=arxiv +common=roberta 'model=glob(roberta*)'
 ```
 
 ### Holdout domain
@@ -82,8 +69,8 @@ python train_single_domain.py -m data_collection=mfc +common=roberta 'model=glob
 Train with D-1 domains of samples where D is the number of available domains, and use the remaining domain to evaluate the model
 
 ```
-python train_holdout_domain.py -m data_collection=mfc +common=logreg 'model=glob(logreg*)'
-python train_holdout_domain.py -m data_collection=mfc +common=roberta 'model=glob(roberta*)'
+python train_holdout_domain.py -m data_collection=arxiv +common=logreg 'model=glob(logreg*)'
+python train_holdout_domain.py -m data_collection=arxiv +common=roberta 'model=glob(roberta*)'
 ```
 
 ### Class Distribution Estimation
@@ -92,12 +79,12 @@ With the models checkpoints trained in "Holdout domain", run prediction with the
 
 ```
 python eval_holdout_domain_class_dist_est.py -m \
-    data_collection=mfc \
+    data_collection=arxiv \
     model=logreg_dsbias_dsnorm \
     +common=logreg \
     n_labeled_samples=100,150,200,250,300,350,400
 python eval_holdout_domain_class_dist_est.py -m \
-    data_collection=mfc \
+    data_collection=arxiv \
     model=roberta_dsbias \
     +common=roberta \
     n_labeled_samples=100,150,200,250,300,350,400
