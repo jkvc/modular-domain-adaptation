@@ -51,7 +51,7 @@ If you find this work useful, please include a citation to the following publica
 @inproceedings{chen.2022.modular,
   author={Junshen K. Chen and Dallas Card and Dan Jurafsky},
   title={Modular Domain Adaptation},
-  booktitle={Proceedings of ACL},
+  booktitle={Findings of ACL},
   year={2022},
 }
 ```
